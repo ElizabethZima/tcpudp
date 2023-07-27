@@ -19,7 +19,6 @@ void delay(int i){
 }
 
 void udp(UdpReceiver& ur, QUdpSocket& qus, qint16 PORT, QByteArray& msg){
-    delay(100);
 
     qus.bind(QHostAddress("127.0.0.1"), PORT);
 
@@ -27,24 +26,10 @@ void udp(UdpReceiver& ur, QUdpSocket& qus, qint16 PORT, QByteArray& msg){
 
     qus.writeDatagram(msg, QHostAddress("127.0.0.1"), PORT);
 
+
     std::cout << "--- Recevier ---" << std::endl;
-
+    ur.receive();
 }
-
-void tcp() {
-
-//    std::cout << "--- TCP Server ---" << std::endl;
-//    TcpServer ts;
-//    ts.accept_connection();
-//
-//    std::cout << "--- TCP Client ---" << std::endl;
-//    TcpClient tc;
-//    tc.send_msg();
-//    tc.read_msg();
-
-    delay(100);
-
-};
 
 class configReader {
 
@@ -94,13 +79,16 @@ private :
                 QJsonObject udpObject = newObject["udp"].toObject();
                 QString host = udpObject["host"].toString();
                 int port = udpObject["port"].toInt();
+                qint16 delaytime = udpObject["timeout_seconds"].toInt();
 
                 QByteArray msg;
                 msg.append(udpObject["message"].toString());
-
+                delay(delaytime);
 
                 qDebug() << "UDP Host: " << host;
                 qDebug() << "UDP Port: " << port;
+
+                delay(delaytime);
 
                 UdpReceiver ur(port);
                 QUdpSocket qus;
@@ -116,20 +104,25 @@ private :
                 QJsonObject tcpObject = newObject["tcp"].toObject();
                 QString host = tcpObject["host"].toString();
                 qint16 port = tcpObject["port"].toInt();
+                qint16 delaytime = tcpObject["timeout_seconds"].toInt();
+                QByteArray msg;
+                msg.append(tcpObject["message"].toString());
 
                 qDebug() << "TCP Host: " << host;
                 qDebug() << "TCP Port: " << port;
-                //delay(100);
+                delay(delaytime);
 
                 std::cout << "--- TCP Client ---" << std::endl;
-                TcpClient tc(port);
+                TcpClient tc(port, msg);
 
                 std::cout << "--- TCP Server ---" << std::endl;
                 TcpServer ts(port);
 
-                //delay(2000);
+                delay(delaytime);
 
             }
+
+            delay(2500);
 
         }
 
