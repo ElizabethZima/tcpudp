@@ -81,6 +81,7 @@ void comport(QString port1, QString port2, QByteArray& msg){
     serial2.close();
 }
 
+
 class configReader {
 
 private :
@@ -171,6 +172,7 @@ private :
                 delay(delaytime);
 
             }
+
 
             else if(newObject.contains("com")){
                 qDebug() << "Comport";

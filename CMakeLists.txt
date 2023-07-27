@@ -25,7 +25,8 @@ target_link_libraries(tcpudp
         Qt5::Gui
         Qt5::Widgets
         Qt5::Network
-        Qt5::SerialPort
+        Qt5:SerialPort
+
         )
 
 if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
