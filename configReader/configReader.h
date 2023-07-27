@@ -9,6 +9,7 @@
 #include "../udp/udpreceiver.h"
 #include "../tcp/tcpserver.h"
 #include "../tcp/tcpclient.h"
+#include "QtSerialPort/QSerialPort"
 
 void delay(int i){
 
@@ -30,6 +31,56 @@ void udp(UdpReceiver& ur, QUdpSocket& qus, qint16 PORT, QByteArray& msg){
     std::cout << "--- Recevier ---" << std::endl;
     ur.receive();
 }
+
+
+void comport(QString port1, QString port2, QByteArray& msg){
+    // Создаем объект класса QSerialPort для работы с портом
+    QSerialPort serial;
+    QSerialPort serial2;
+
+    // Устанавливаем имя COM-порта (например, "COM1" или "/dev/ttyUSB0")
+    serial.setPortName(port1);
+    serial2.setPortName(port2);
+
+
+    // Открываем порт в режиме чтения и записи
+    if (!serial2.open(QIODevice::ReadWrite)) {
+        qDebug() << "Port opening error 1:" << serial2.errorString();
+        return;
+    }
+
+    // Открываем порт в режиме чтения и записи
+    if (!serial.open(QIODevice::ReadWrite)) {
+        qDebug() << "Port opening error 2:" << serial.errorString();
+        return;
+    }
+
+    // Настраиваем параметры соединения (скорость передачи данных, биты данных и т.д.)
+    serial.setBaudRate(QSerialPort::Baud9600);
+    serial2.setBaudRate(QSerialPort::Baud9600);
+
+
+
+    // Записываем данные в порт
+    qDebug() << "Writing:";
+    if(serial.write(msg) == -1)
+        qDebug()<< "Error when sending data";
+    else
+        qDebug().noquote() << msg;
+
+    delay(100);
+    // Читаем данные из порта
+    qDebug() << "Reading:";
+    serial2.waitForReadyRead(100);
+    QByteArray data = serial2.readAll();
+    qDebug() << data << "\n";
+
+
+    // Закрываем порт после использования
+    serial.close();
+    serial2.close();
+}
+
 
 class configReader {
 
@@ -122,7 +173,27 @@ private :
 
             }
 
-            delay(2500);
+
+            else if(newObject.contains("com")){
+                qDebug() << "Comport";
+
+                QJsonObject comObject = newObject["com"].toObject();
+                QString port1 = comObject["port1"].toString();
+                QString port2 = comObject["port2"].toString();
+                qint16 delaytime = comObject["timeout_seconds"].toInt();
+                QByteArray msg;
+                msg.append(comObject["message"].toString());
+
+                qDebug() << "PORT 1 : " << port1;
+                qDebug() << "PORT 2 : " << port2;
+                delay(delaytime);
+                comport(port1, port2,msg);
+            }
+            else{
+                qDebug() << "Unknown";
+            }
+
+            delay(2000);
 
         }
 
